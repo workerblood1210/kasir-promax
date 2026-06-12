@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 27 - Gateway Kasir Promax</title>
+    <style>
+        /* Base Reset & Core Typography */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            display: block;
+            background: #020205;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Fluid Engine Background */
+        .ambient-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at 10% 20%, #0d1127 0%, #020205 80%),
+                        radial-gradient(circle at 90% 80%, #1a0b2e 0%, #020205 80%);
+            overflow: hidden;
+        }
+
+        .blur-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.45;
+            mix-blend-mode: screen;
+            animation: fluidMotion 25s infinite alternate ease-in-out;
+        }
+
+        .blob-1 { width: 45vh; height: 45vh; background: linear-gradient(135deg, #4f46e5, #7c3aed); top: 15%; left: 10%; }
+        .blob-2 { width: 55vh; height: 55vh; background: linear-gradient(135deg, #b5179e, #3a0ca3); bottom: 10%; right: 5%; animation-delay: -7s; }
+        .blob-3 { width: 35vh; height: 35vh; background: linear-gradient(135deg, #06b6d4, #3b82f6); bottom: 40%; left: 40%; animation-delay: -14s; }
+
+        @keyframes fluidMotion {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(8%, 12%) scale(1.15) rotate(90deg); }
+            100% { transform: translate(-5%, -8%) scale(0.9) rotate(180deg); }
+        }
+
+        /* Root Architecture & Layout Matrix */
+        .system-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: env(safe-area-inset-top) 2rem env(safe-area-inset-bottom) 2rem;
+        }
+
+        /* Dynamic Island 27.0 - Notification Engine */
+        .dynamic-island-pro {
+            position: absolute;
+            top: 24px;
+            width: 120px;
+            height: 36px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .dynamic-island-pro.notify {
+            width: 320px;
+            height: 48px;
+            background: rgba(15, 15, 20, 0.95);
+        }
+
+        .dynamic-island-pro.notify.error {
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 20px 50px rgba(239, 68, 68, 0.25);
+        }
+        
+        .dynamic-island-pro.notify.success {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 20px 50px rgba(16, 185, 129, 0.25);
+        }
+
+        .island-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            transition: opacity 0.3s;
+            position: absolute;
+        }
+
+        .island-message {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #ffffff;
+            opacity: 0;
+            position: absolute;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .dynamic-island-pro.notify .island-status { opacity: 0; pointer-events: none; }
+        .dynamic-island-pro.notify .island-message { opacity: 1; }
+
+        /* System Header Accent */
+        .system-meta { text-align: center; margin-bottom: 2rem; pointer-events: none; }
+        .system-title { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 4px; color: #a78bfa; opacity: 0.9; margin-bottom: 0.5rem; }
+        .system-subtitle { font-size: 2rem; font-weight: 300; letter-spacing: -1px; background: linear-gradient(to bottom, #ffffff 60%, rgba(255,255,255,0.7)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Glassmorphism Form Container */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(35px) saturate(210%);
+            -webkit-backdrop-filter: blur(35px) saturate(210%);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 36px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 380px;
+            display: none; /* Handled by JS */
+            flex-direction: column;
+            gap: 1.2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0px rgba(255, 255, 255, 0.1);
+            animation: panelFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-panel.active { display: flex; }
+
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .form-desc { text-align: center; font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem; line-height: 1.4; }
+
+        /* Input Controls */
+        .input-group { position: relative; width: 100%; }
+        
+        .glass-input {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #fff;
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(167, 139, 250, 0.5);
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.15);
+        }
+
+        .glass-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+        /* Eye Icon for Password */
+        .eye-icon {
+            position: absolute;
+            right: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: rgba(255,255,255,0.4);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.3s;
+        }
+        .eye-icon:hover { stroke: rgba(255,255,255,0.8); }
+
+        /* Glass Button */
+        .glass-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-top: 0.5rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.8), rgba(79, 70, 229, 0.8));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+        }
+
+        .glass-btn:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 1), rgba(79, 70, 229, 1));
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4);
+        }
+
+        .glass-btn:active { transform: translateY(1px); }
+
+        .text-link {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #a78bfa;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: color 0.3s;
+        }
+        .text-link:hover { color: #ffffff; text-decoration: underline; }
+
+        .system-footer {
+            position: absolute;
+            bottom: 24px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-canvas">
+        <div class="blur-blob blob-1"></div>
+        <div class="blur-blob blob-2"></div>
+        <div class="blur-blob blob-3"></div>
+    </div>
+
+    <div class="system-wrapper">
+        
+        <div class="dynamic-island-pro" id="notificationIsland">
+            <span class="island-status">Secure Gateway</span>
+            <span class="island-message" id="islandMessage">Message here</span>
+        </div>
+
+        <div class="system-meta">
+            <div class="system-title">KASIR PROMAX</div>
+            <div class="system-subtitle" id="viewTitle">Aktivasi Sistem</div>
+        </div>
+
+        <div class="glass-panel" id="view-activation">
+            <div class="form-desc">Masukkan kode aktivasi lisensi sistem untuk memulai konfigurasi awal.</div>
+            <div class="input-group">
+                <input type="text" id="actCode" class="glass-input" placeholder="Kode Aktivasi" autocomplete="off">
+            </div>
+            <button class="glass-btn" onclick="processActivation()">VERIFIKASI</button>
+        </div>
+
+        <div class="glass-panel" id="view-setup">
+            <div class="form-desc">Aktivasi berhasil. Buat kredensial Administrator utama untuk sistem Kasir Promax.</div>
+            <div class="input-group">
+                <input type="text" id="setupUser" class="glass-input" placeholder="Buat Username" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <input type="password" id="setupPass" class="glass-input" placeholder="Buat Password">
+                <svg class="eye-icon" onclick="togglePassword('setupPass')" viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </div>
+            <button class="glass-btn" onclick="processSetup()">SIMPAN KREDENSIAL</button>
+        </div>
+
+        <div class="glass-panel" id="view-login">
+            <div class="form-desc">Autentikasi diperlukan. Masukkan kredensial Administrator yang telah dibuat.</div>
+            <div class="input-group">
+                <input type="text" id="loginUser" class="glass-input" placeholder="Username" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <input type="password" id="loginPass" class="glass-input" placeholder="Password">
+                <svg class="eye-icon" onclick="togglePassword('loginPass')" viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </div>
+            <button class="glass-btn" onclick="processLogin()">MASUK SISTEM</button>
+            <div class="text-link" onclick="switchView('forgot')">Lupa Password?</div>
+        </div>
+
+        <div class="glass-panel" id="view-forgot">
+            <div class="form-desc">Sistem keamanan mendeteksi permintaan reset. Masukkan ulang kode aktivasi mutlak.</div>
+            <div class="input-group">
+                <input type="password" id="forgotCode" class="glass-input" placeholder="Kode Aktivasi Mutlak">
+                <svg class="eye-icon" onclick="togglePassword('forgotCode')" viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </div>
+            <button class="glass-btn" onclick="processForgot()">RESET AKSES</button>
+            <div class="text-link" onclick="switchView('login')">Kembali ke Login</div>
+        </div>
+
+        <div class="system-footer">ENGINE CORE</div>
+    </div>
+
+    <script>
+        // System Constants
+        const SECRET_ACTIVATION_CODE = "kamupastibisa.id";
+        
+        // Notification Engine Logic (Replaces standard alert)
+        let islandTimeout;
+        function showNotification(message, type = 'error') {
+            const island = document.getElementById('notificationIsland');
+            const msgEl = document.getElementById('islandMessage');
+            
+            clearTimeout(islandTimeout);
+            
+            island.className = 'dynamic-island-pro'; // reset
+            void island.offsetWidth; // trigger reflow
+            
+            msgEl.textContent = message;
+            island.classList.add('notify', type);
+            
+            islandTimeout = setTimeout(() => {
+                island.classList.remove('notify', 'error', 'success');
+            }, 3000);
+        }
+
+        // View Router
+        function switchView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.glass-panel').forEach(panel => panel.classList.remove('active'));
+            
+            // Clear all inputs for security
+            document.querySelectorAll('input').forEach(input => input.value = '');
+
+            // Update UI
+            const titleEl = document.getElementById('viewTitle');
+            if(viewName === 'activation') {
+                document.getElementById('view-activation').classList.add('active');
+                titleEl.textContent = 'Aktivasi Sistem';
+            } else if(viewName === 'setup') {
+                document.getElementById('view-setup').classList.add('active');
+                titleEl.textContent = 'Setup Admin';
+            } else if(viewName === 'login') {
+                document.getElementById('view-login').classList.add('active');
+                titleEl.textContent = 'Otorisasi Login';
+            } else if(viewName === 'forgot') {
+                document.getElementById('view-forgot').classList.add('active');
+                titleEl.textContent = 'Reset Keamanan';
+            }
+        }
+
+        // Feature: Toggle Password Visibility
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            if(input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        // Logic 1: Activation
+        function processActivation() {
+            const code = document.getElementById('actCode').value.trim();
+            if(code === SECRET_ACTIVATION_CODE) {
+                localStorage.setItem('sys_activated', 'true');
+                showNotification('Aktivasi Berhasil!', 'success');
+                setTimeout(() => switchView('setup'), 800);
+            } else {
+                showNotification('Kode aktivasi tidak valid!', 'error');
+            }
+        }
+
+        // Logic 2: Setup Admin
+        function processSetup() {
+            const user = document.getElementById('setupUser').value.trim();
+            const pass = document.getElementById('setupPass').value.trim();
+            
+            if(user.length < 3 || pass.length < 4) {
+                showNotification('Minimal username 3 char & password 4 char!', 'error');
+                return;
+            }
+
+            // Encrypting locally (simulated by localStorage)
+            localStorage.setItem('sys_admin_user', user);
+            localStorage.setItem('sys_admin_pass', pass);
+            
+            showNotification('Kredensial tersimpan!', 'success');
+            setTimeout(() => switchView('login'), 800);
+        }
+
+        // Logic 3: Login
+        function processLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            
+            const savedUser = localStorage.getItem('sys_admin_user');
+            const savedPass = localStorage.getItem('sys_admin_pass');
+
+            if(user === savedUser && pass === savedPass) {
+                showNotification('Akses Diberikan. Mengalihkan...', 'success');
+                // Redirecting to Dashboard Utama
+                setTimeout(() => {
+                    window.location.href = 'DASHBOARDUTAMA.html';
+                }, 1000);
+            } else {
+                showNotification('Username atau Password salah!', 'error');
+            }
+        }
+
+        // Logic 4: Forgot Password (Reset Route)
+        function processForgot() {
+            const code = document.getElementById('forgotCode').value.trim();
+            if(code === SECRET_ACTIVATION_CODE) {
+                // Clear old credentials
+                localStorage.removeItem('sys_admin_user');
+                localStorage.removeItem('sys_admin_pass');
+                
+                showNotification('Otentikasi berhasil. Silakan buat ulang!', 'success');
+                setTimeout(() => switchView('setup'), 1000);
+            } else {
+                showNotification('Kode mutlak salah! Akses ditolak.', 'error');
+            }
+        }
+
+        // Boot Sequence Engine
+        window.onload = () => {
+            const isActivated = localStorage.getItem('sys_activated');
+            const hasAdmin = localStorage.getItem('sys_admin_user');
+
+            if (isActivated === 'true' && hasAdmin) {
+                switchView('login');
+            } else if (isActivated === 'true') {
+                switchView('setup');
+            } else {
+                switchView('activation');
+            }
+        }
+    </script>
+</body>
+</html>

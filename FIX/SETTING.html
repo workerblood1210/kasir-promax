@@ -1,0 +1,463 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 27 - Settings Hub</title>
+    <style>
+        /* ==========================================================================
+           1. BASE RESET & CORE TYPOGRAPHY (Consistent with Main Dashboard)
+           ========================================================================== */
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background: #020205; color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+            min-height: 100vh; overflow-x: hidden; position: relative;
+        }
+
+        /* Ambient Fluid Engine */
+        .ambient-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+            background: radial-gradient(circle at 10% 20%, #0d1127 0%, #020205 80%),
+                        radial-gradient(circle at 90% 80%, #1a0b2e 0%, #020205 80%);
+            overflow: hidden; pointer-events: none;
+        }
+
+        .blur-blob {
+            position: absolute; border-radius: 50%; filter: blur(120px);
+            opacity: 0.45; mix-blend-mode: screen;
+            animation: fluidMotion 25s infinite alternate ease-in-out;
+        }
+
+        .blob-1 { width: 45vh; height: 45vh; background: linear-gradient(135deg, #4f46e5, #7c3aed); top: 15%; left: 10%; }
+        .blob-2 { width: 55vh; height: 55vh; background: linear-gradient(135deg, #b5179e, #3a0ca3); bottom: 10%; right: 5%; animation-delay: -7s; }
+        .blob-3 { width: 35vh; height: 35vh; background: linear-gradient(135deg, #06b6d4, #3b82f6); bottom: 40%; left: 40%; animation-delay: -14s; }
+
+        @keyframes fluidMotion {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(8%, 12%) scale(1.15) rotate(90deg); }
+            100% { transform: translate(-5%, -8%) scale(0.9) rotate(180deg); }
+        }
+
+        /* ==========================================================================
+           2. LAYOUT & NAVIGATION
+           ========================================================================== */
+        .system-wrapper {
+            position: relative; z-index: 2; width: 100%; min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 4rem 2rem;
+        }
+
+        /* Back Navigation */
+        .nav-back {
+            position: absolute; top: 30px; left: 30px;
+            display: flex; align-items: center; gap: 10px;
+            color: rgba(255,255,255,0.7); text-decoration: none;
+            font-weight: 600; letter-spacing: 1px; transition: 0.3s;
+            z-index: 10;
+        }
+        .nav-back:hover { color: #fff; transform: translateX(-5px); }
+        
+        .system-meta { text-align: center; margin-bottom: 3.5rem; }
+        .page-title {
+            font-size: 2.5rem; font-weight: 300; letter-spacing: 2px;
+            background: linear-gradient(to bottom, #ffffff 60%, rgba(255,255,255,0.4));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* Grid Matrix - 3 Items */
+        .control-hub-grid {
+            display: grid; gap: 2rem; width: 100%; max-width: 1000px;
+        }
+
+        @media (min-aspect-ratio: 1/1) { /* 16:9 */
+            .control-hub-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-aspect-ratio: 1/1) { /* 9:16 */
+            .control-hub-grid { grid-template-columns: 1fr; max-width: 340px; }
+        }
+
+        /* Glass Node Buttons */
+        .ios-action-trigger {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(35px) saturate(210%); -webkit-backdrop-filter: blur(35px) saturate(210%);
+            border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 36px;
+            padding: 3rem 2rem; display: flex; flex-direction: column; align-items: center;
+            cursor: pointer; position: relative; overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0px rgba(255, 255, 255, 0.1);
+        }
+        .ios-action-trigger:hover {
+            transform: translateY(-10px) scale(1.03);
+            background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45), 0 0 40px rgba(139, 92, 246, 0.15);
+        }
+
+        .square-glass-icon {
+            width: 80px; height: 80px; background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 22px;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;
+            transition: all 0.5s;
+        }
+        .ios-action-trigger:hover .square-glass-icon {
+            transform: scale(1.06) rotate(3deg); background: rgba(255, 255, 255, 0.12);
+        }
+        .square-glass-icon svg { width: 34px; height: 34px; fill: none; stroke: #fff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+        .action-label { font-size: 1rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.85); text-align: center; }
+
+        /* ==========================================================================
+           3. FULLSCREEN OVERLAY MODALS (Menyembul Animasi)
+           ========================================================================== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 2, 5, 0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            z-index: 1000; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease; padding: 2rem;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-container {
+            width: 100%; max-width: 1200px; height: 90vh;
+            background: rgba(20, 20, 30, 0.7); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 36px; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.2);
+            /* Menyembul Physics */
+            transform: scale(0.85) translateY(40px);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal-container { transform: scale(1) translateY(0); }
+
+        .modal-header {
+            padding: 1.5rem 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-title { font-size: 1.2rem; font-weight: 600; letter-spacing: 2px; color: #a78bfa; }
+        .close-btn {
+            background: rgba(255,255,255,0.1); border: none; width: 40px; height: 40px;
+            border-radius: 50%; color: #fff; font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+        }
+        .close-btn:hover { background: #ef4444; transform: rotate(90deg); }
+
+        .modal-body {
+            padding: 2.5rem; overflow-y: auto; flex: 1;
+        }
+        .modal-body::-webkit-scrollbar { width: 8px; }
+        .modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        /* ==========================================================================
+           4. INTERNAL MODAL UI COMPONENTS (Forms, Tables, Charts)
+           ========================================================================== */
+        /* Forms */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .input-group label { font-size: 0.85rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; }
+        .glass-input {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem; border-radius: 16px; color: #fff; font-family: inherit; font-size: 1rem;
+            transition: 0.3s; outline: none;
+        }
+        .glass-input:focus { border-color: #a78bfa; background: rgba(0,0,0,0.5); box-shadow: 0 0 15px rgba(167,139,250,0.2); }
+        
+        /* Buttons inside Modals */
+        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+        .btn {
+            padding: 1rem 2rem; border-radius: 16px; border: none; font-weight: 600; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(99,102,241,0.6); }
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.5); }
+        .btn-danger:hover { background: #ef4444; color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+        /* Tables */
+        .table-container {
+            width: 100%; overflow-x: auto; background: rgba(0,0,0,0.2);
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 2rem;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 1.2rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* Card / Sections */
+        .glass-card {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px; padding: 2rem; margin-bottom: 2rem;
+        }
+        .section-title { font-size: 1.1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
+
+        /* Mock Chart Area */
+        .chart-placeholder {
+            width: 100%; height: 300px; border-radius: 20px;
+            background: linear-gradient(180deg, rgba(99,102,241,0.1) 0%, rgba(0,0,0,0.2) 100%);
+            border: 1px dashed rgba(255,255,255,0.2); display: flex; align-items: flex-end; padding: 1rem; gap: 10px; justify-content: space-between;
+        }
+        .chart-bar { background: linear-gradient(to top, #8b5cf6, #3b82f6); width: 8%; border-radius: 6px 6px 0 0; transition: height 1s; animation: growBar 1.5s ease-out forwards; }
+        @keyframes growBar { from { height: 0 !important; } }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-canvas">
+        <div class="blur-blob blob-1"></div>
+        <div class="blur-blob blob-2"></div>
+        <div class="blur-blob blob-3"></div>
+    </div>
+
+    <div class="system-wrapper">
+        <a href="DASHBOARDUTAMA.html" class="nav-back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Kembali ke Dashboard
+        </a>
+
+        <div class="system-meta">
+            <h1 class="page-title">SYSTEM SETTING</h1>
+        </div>
+
+        <div class="control-hub-grid">
+            <div class="ios-action-trigger" onclick="openModal('modal-produk')">
+                <div class="square-glass-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                </div>
+                <div class="action-label">Manajemen<br>Produk</div>
+            </div>
+
+            <div class="ios-action-trigger" onclick="openModal('modal-analytic')">
+                <div class="square-glass-icon">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                </div>
+                <div class="action-label">Analytic &<br>Laporan</div>
+            </div>
+
+            <div class="ios-action-trigger" onclick="openModal('modal-system')">
+                <div class="square-glass-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </div>
+                <div class="action-label">System<br>Configuration</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-produk">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">📦 MANAJEMEN PRODUK TERINTEGRASI</div>
+                <button class="close-btn" onclick="closeModal('modal-produk')">✕</button>
+            </div>
+            <div class="modal-body">
+                
+                <div class="glass-card">
+                    <h3 class="section-title">Form Data Produk (Tambah/Edit/Hapus)</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>ID Unik / Barcode</label>
+                            <input type="text" class="glass-input" placeholder="Scan atau input manual...">
+                        </div>
+                        <div class="input-group">
+                            <label>Nama Produk</label>
+                            <input type="text" class="glass-input" placeholder="Contoh: Kopi Robusta Premium">
+                        </div>
+                        <div class="input-group">
+                            <label>Harga Modal (Rp)</label>
+                            <input type="number" class="glass-input" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Harga Jual (Rp)</label>
+                            <input type="number" class="glass-input" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Pajak Spesifik (%) - Opsional</label>
+                            <input type="number" class="glass-input" placeholder="Misal: 11">
+                        </div>
+                        <div class="input-group">
+                            <label>Upload Gambar Produk (.jpeg, .png)</label>
+                            <input type="file" class="glass-input" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>Deskripsi Detail</label>
+                        <textarea class="glass-input" rows="3" placeholder="Jelaskan spesifikasi produk..."></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary">Simpan Baru</button>
+                        <button class="btn btn-outline">Update Data</button>
+                        <button class="btn btn-danger">Hapus Produk</button>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 class="section-title">Bulk Import Data (Excel, PDF, Images)</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Upload File Master Data</label>
+                            <input type="file" class="glass-input" accept=".xlsx, .xls, .pdf, image/*">
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary">Mulai Sinkronisasi Import</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-analytic">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">📈 ANALYTIC & REKAPITULASI</div>
+                <button class="close-btn" onclick="closeModal('modal-analytic')">✕</button>
+            </div>
+            <div class="modal-body">
+                
+                <div class="glass-card">
+                    <h3 class="section-title">Filter Waktu Analisis</h3>
+                    <div class="form-grid">
+                        <div class="input-group"><label>Dari Tanggal</label><input type="date" class="glass-input"></div>
+                        <div class="input-group"><label>Sampai Tanggal</label><input type="date" class="glass-input"></div>
+                        <div class="input-group">
+                            <label>Tarik Data</label>
+                            <button class="btn btn-primary">Generate Laporan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 class="section-title">Grafik Trend Penjualan Produk</h3>
+                    <div class="chart-placeholder">
+                        <div class="chart-bar" style="height: 40%;"></div>
+                        <div class="chart-bar" style="height: 60%;"></div>
+                        <div class="chart-bar" style="height: 35%;"></div>
+                        <div class="chart-bar" style="height: 80%;"></div>
+                        <div class="chart-bar" style="height: 50%;"></div>
+                        <div class="chart-bar" style="height: 90%;"></div>
+                        <div class="chart-bar" style="height: 75%;"></div>
+                        <div class="chart-bar" style="height: 100%;"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 class="section-title">Kalkulasi Laba / Rugi</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Periode</th><th>Total Omzet</th><th>Total Modal</th><th>Pajak</th><th>Net Profit (Laba)</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Bulan Ini</td><td>Rp 125.000.000</td><td>Rp 75.000.000</td><td>Rp 5.000.000</td><td style="color: #4ade80;">Rp 45.000.000</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-outline">Export to Excel</button>
+                        <button class="btn btn-outline">Export to CSV</button>
+                        <button class="btn btn-primary">Cetak PDF</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-system">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">⚙️ SYSTEM & SECURITY CONFIGURATION</div>
+                <button class="close-btn" onclick="closeModal('modal-system')">✕</button>
+            </div>
+            <div class="modal-body">
+                
+                <div class="glass-card">
+                    <h3 class="section-title">Konfigurasi Metode Pembayaran</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Tipe Pembayaran</label>
+                            <select class="glass-input">
+                                <option>QRIS Dinamis / Statis</option>
+                                <option>Transfer Bank</option>
+                                <option>Cash / Tunai</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Detail (No. Rek / Nama Merchant)</label>
+                            <input type="text" class="glass-input" placeholder="Masukkan detail...">
+                        </div>
+                        <div class="input-group">
+                            <label>Upload Barcode QR / Logo Bank</label>
+                            <input type="file" class="glass-input" accept="image/*">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 1rem;">Simpan Metode Baru</button>
+                </div>
+
+                <div class="glass-card">
+                    <h3 class="section-title">Database: Backup & Pulihkan</h3>
+                    <p style="font-size: 0.85rem; color: #a1a1aa; margin-bottom: 1rem;">Integrasi realtime untuk mencadangkan struktur data masif.</p>
+                    <div class="btn-group">
+                        <button class="btn btn-primary">Backup Seluruh Data Sekarang</button>
+                        <button class="btn btn-danger">Pulihkan dari Backup Lokal</button>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 class="section-title">Manajemen Kredensial Pengguna (Admin)</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Nama Pengguna / Admin Baru</label>
+                            <input type="text" class="glass-input" placeholder="Nama lengkap...">
+                        </div>
+                        <div class="input-group">
+                            <label>Ubah PIN Akses</label>
+                            <input type="password" class="glass-input" placeholder="6 Digit Angka" maxlength="6">
+                        </div>
+                        <div class="input-group">
+                            <label>Ubah Password Utama</label>
+                            <input type="password" class="glass-input" placeholder="Kombinasi kuat...">
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" style="margin-top: 1rem; border-color: #f87171; color: #f87171;">Simpan & Paksa Relogin Akun</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi Pemanggilan Animasi Modal Berdasarkan ID
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) {
+                modal.classList.add('active');
+                // Menghentikan scroll background saat modal terbuka
+                document.body.style.overflow = 'hidden'; 
+            }
+        }
+
+        // Fungsi Menutup Modal
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) {
+                modal.classList.remove('active');
+                // Mengembalikan fungsi scroll
+                document.body.style.overflow = 'auto'; 
+            }
+        }
+
+        // Fitur klik area luar untuk menutup (Opsional tapi bagus untuk UX)
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+
+</body>
+</html>

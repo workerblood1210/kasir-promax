@@ -1,0 +1,505 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 27 - Dashboard Katalog</title>
+    <style>
+        /* Base Reset & Core Typography */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background: #020205;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Ambient Fluid Engine Background */
+        .ambient-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 10% 20%, #0d1127 0%, #020205 80%);
+        }
+
+        .blur-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.45;
+            mix-blend-mode: screen;
+            animation: fluidMotion 25s infinite alternate ease-in-out;
+        }
+        .blob-1 { width: 45vh; height: 45vh; background: linear-gradient(135deg, #4f46e5, #7c3aed); top: 15%; left: 10%; }
+        .blob-2 { width: 55vh; height: 55vh; background: linear-gradient(135deg, #b5179e, #3a0ca3); bottom: 10%; right: 5%; animation-delay: -7s; }
+
+        @keyframes fluidMotion {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-5%, -8%) scale(1.1); }
+        }
+
+        /* Top Bar Navigation (Back, Clock, Island) */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 1.5rem 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px; height: 44px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.05); }
+
+        .realtime-clock {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.5px;
+        }
+
+        /* Dynamic Island Pro */
+        .dynamic-island-pro {
+            width: 160px; height: 36px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: default;
+        }
+        .dynamic-island-pro:hover { width: 220px; height: 48px; }
+        .island-status { font-size: 0.8rem; font-weight: 600; color: rgba(255, 255, 255, 0.8); transition: opacity 0.3s; }
+        .island-expanded { display: none; font-size: 0.8rem; font-weight: 500; color: #a78bfa; }
+        .dynamic-island-pro:hover .island-status { display: none; }
+        .dynamic-island-pro:hover .island-expanded { display: block; }
+
+        /* Main Workspace Container */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Search & Categories */
+        .interaction-hub {
+            margin-bottom: 1.5rem;
+            z-index: 5;
+        }
+
+        /* Search Wrapper for Reset Button Injection */
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .search-bar {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            padding: 1.2rem 2.8rem 1.2rem 1.5rem; /* Added right padding for X button */
+            border-radius: 20px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .search-bar:focus { border-color: rgba(167, 139, 250, 0.5); background: rgba(255, 255, 255, 0.08); }
+
+        /* New Reset (X) Button Styles */
+        .clear-search-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .clear-search-btn.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .clear-search-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .category-scroll {
+            display: flex;
+            gap: 0.8rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            scrollbar-width: none; /* Firefox */
+        }
+        .category-scroll::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        .cat-btn.active, .cat-btn:hover {
+            background: rgba(167, 139, 250, 0.2);
+            border-color: rgba(167, 139, 250, 0.5);
+            color: white;
+        }
+
+        /* Product Catalog (5 Grid, Scrollable) */
+        .catalog-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 6rem; /* Space for dock */
+            padding-right: 10px;
+        }
+        
+        /* Custom Scrollbar for Catalog */
+        .catalog-container::-webkit-scrollbar { width: 6px; }
+        .catalog-container::-webkit-scrollbar-track { background: transparent; }
+        .catalog-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1200px) { .catalog-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 900px) { .catalog-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 600px) { .catalog-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 24px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.4s, background 0.4s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .product-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4));
+        }
+
+        .product-name { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: #fff; }
+        .product-price { font-size: 0.85rem; color: #a78bfa; font-weight: 700; }
+
+        /* Bottom Dock & Cart Button */
+        .dock-container {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+        }
+
+        .cart-btn {
+            width: 64px; height: 64px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(35px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 20px; /* iOS Squircle */
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.4);
+            transition: all 0.3s;
+        }
+        .cart-btn:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.15); }
+        
+        .cart-btn svg { width: 28px; height: 28px; fill: none; stroke: #fff; stroke-width: 2; }
+
+        /* Cart Modal (Interactive Tab) */
+        .cart-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            z-index: 30;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s ease;
+        }
+        .cart-modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .cart-modal {
+            position: fixed;
+            bottom: -100%; left: 50%;
+            transform: translateX(-50%);
+            width: 90%; max-width: 500px;
+            background: rgba(15, 15, 20, 0.85);
+            backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 32px 32px 0 0;
+            padding: 2rem;
+            z-index: 40;
+            transition: bottom 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 -20px 50px rgba(0,0,0,0.5);
+        }
+        .cart-modal.active { bottom: 0; }
+
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;
+        }
+        .modal-title { font-weight: 600; font-size: 1.2rem; }
+        .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        .empty-state { text-align: center; color: rgba(255,255,255,0.5); padding: 2rem 0; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-canvas">
+        <div class="blur-blob blob-1"></div>
+        <div class="blur-blob blob-2"></div>
+    </div>
+
+    <header class="top-nav">
+        <div class="nav-left">
+            <a href="DASHBOARDUTAMA.html" class="back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </a>
+            <div class="realtime-clock" id="liveDateTime">Memuat Waktu...</div>
+        </div>
+
+        <div class="dynamic-island-pro">
+            <span class="island-status">Admin Active</span>
+            <span class="island-expanded">🛡️ KASIR PROMAX - Admin 01</span>
+        </div>
+        
+        <div style="width: 44px;"></div> 
+    </header>
+
+    <div class="workspace">
+        <div class="interaction-hub">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" class="search-bar" placeholder="Cari produk...">
+                <button id="clearSearchBtn" class="clear-search-btn" aria-label="Reset pencarian">&times;</button>
+            </div>
+            
+            <div class="category-scroll" id="categoryContainer">
+                <button class="cat-btn active" data-cat="All">All Items</button>
+                <button class="cat-btn" data-cat="Software">Software & Plugins</button>
+                <button class="cat-btn" data-cat="Hardware">Studio Hardware</button>
+                <button class="cat-btn" data-cat="Packs">Sample Packs</button>
+                <button class="cat-btn" data-cat="Accessories">Accessories</button>
+            </div>
+        </div>
+
+        <div class="catalog-container">
+            <div class="catalog-grid" id="catalogGrid">
+            </div>
+        </div>
+    </div>
+
+    <div class="dock-container">
+        <button class="cart-btn" id="openCartBtn">
+            <svg viewBox="0 0 24 24">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div class="cart-modal-overlay" id="cartOverlay"></div>
+    <div class="cart-modal" id="cartModal">
+        <div class="modal-header">
+            <div class="modal-title">Keranjang Belanja</div>
+            <button class="close-btn" id="closeCartBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="empty-state">Belum ada item di keranjang.</div>
+        </div>
+    </div>
+
+    <script>
+        // Realtime Clock & Date Engine
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('liveDateTime').textContent = now.toLocaleDateString('id-ID', options);
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Product Dummy Data Base
+        const products = [
+            { id: 1, name: "Aura Studio Monitor", category: "Hardware", price: "Rp 3.500.000", icon: "🔊" },
+            { id: 2, name: "Phonk Drum Kit Vol.1", category: "Packs", price: "Rp 150.000", icon: "🥁" },
+            { id: 3, name: "Aura AI Suite License", category: "Software", price: "Rp 850.000", icon: "💻" },
+            { id: 4, name: "Future Bass Synths", category: "Packs", price: "Rp 200.000", icon: "🎹" },
+            { id: 5, name: "Condenser Mic Pro", category: "Hardware", price: "Rp 1.200.000", icon: "🎙️" },
+            { id: 6, name: "Acoustic Panels", category: "Accessories", price: "Rp 300.000", icon: "⬛" },
+            { id: 7, name: "MIDI Keyboard 49-Key", category: "Hardware", price: "Rp 1.800.000", icon: "🎛️" },
+            { id: 8, name: "R&B Vocal Chops", category: "Packs", price: "Rp 100.000", icon: "🎤" },
+            { id: 9, name: "Mixing Headphones", category: "Hardware", price: "Rp 950.000", icon: "🎧" },
+            { id: 10, name: "Cable Management Kit", category: "Accessories", price: "Rp 85.000", icon: "🔌" },
+            { id: 11, name: "Afrobeat Grooves", category: "Packs", price: "Rp 120.000", icon: "🌍" },
+            { id: 12, name: "Audio Interface 2x2", category: "Hardware", price: "Rp 1.500.000", icon: "🎚️" },
+            { id: 13, name: "Deep House Presets", category: "Software", price: "Rp 175.000", icon: "💽" },
+            { id: 14, name: "Desk Boom Arm", category: "Accessories", price: "Rp 250.000", icon: "🦾" }
+        ];
+
+        const gridContainer = document.getElementById('catalogGrid');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const catButtons = document.querySelectorAll('.cat-btn');
+
+        // Render Function
+        function renderCatalog(filterText = '', filterCategory = 'All') {
+            gridContainer.innerHTML = '';
+            
+            const filteredData = products.filter(item => {
+                const matchSearch = item.name.toLowerCase().includes(filterText.toLowerCase());
+                const matchCat = filterCategory === 'All' || item.category === filterCategory;
+                return matchSearch && matchCat;
+            });
+
+            if(filteredData.length === 0) {
+                gridContainer.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:rgba(255,255,255,0.5); padding: 2rem;">Produk tidak ditemukan.</p>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-icon">${item.icon}</div>
+                    <div class="product-name">${item.name}</div>
+                    <div class="product-price">${item.price}</div>
+                `;
+                gridContainer.appendChild(card);
+            });
+        }
+
+        // Search Input Logic (With Reset Button Visibility Toggle)
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            
+            // Toggle Reset Button Visibility
+            if (val.length > 0) {
+                clearSearchBtn.classList.add('active');
+            } else {
+                clearSearchBtn.classList.remove('active');
+            }
+
+            const activeCat = document.querySelector('.cat-btn.active').dataset.cat;
+            renderCatalog(val, activeCat);
+        });
+
+        // Reset Search Button Logic
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearSearchBtn.classList.remove('active');
+            searchInput.focus(); // Keep user in the flow
+            
+            const activeCat = document.querySelector('.cat-btn.active').dataset.cat;
+            renderCatalog('', activeCat);
+        });
+
+        // Category Buttons Logic
+        catButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                catButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                renderCatalog(searchInput.value, e.target.dataset.cat);
+            });
+        });
+
+        // Initial Render
+        renderCatalog();
+
+        // Cart Interaction Logic
+        const openCartBtn = document.getElementById('openCartBtn');
+        const closeCartBtn = document.getElementById('closeCartBtn');
+        const cartModal = document.getElementById('cartModal');
+        const cartOverlay = document.getElementById('cartOverlay');
+
+        function toggleCart() {
+            cartModal.classList.toggle('active');
+            cartOverlay.classList.toggle('active');
+        }
+
+        openCartBtn.addEventListener('click', toggleCart);
+        closeCartBtn.addEventListener('click', toggleCart);
+        cartOverlay.addEventListener('click', toggleCart);
+    </script>
+</body>
+</html>
