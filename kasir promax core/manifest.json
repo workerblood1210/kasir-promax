@@ -1,0 +1,21 @@
+﻿{
+  "short_name": "KasirPromax",
+  "name": "Kasir Promax OS - Enterprise",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/index.html",
+  "background_color": "#020205",
+  "theme_color": "#020205",
+  "display": "standalone",
+  "orientation": "landscape"
+}
