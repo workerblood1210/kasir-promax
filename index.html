@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -7,13 +7,28 @@
     
     <link rel="stylesheet" href="core.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0071e3"> 
-    
+    <meta name="theme-color" content="#4CAF50"> 
+
     <style>
         /* ======================================================================
-           MINIMALIST ENTERPRISE LAYOUT & THEME ENGINE (CTO ARCHITECTURE)
+           MINIMALIST ENTERPRISE LAYOUT & THEME ENGINE 
            ====================================================================== */
         
+        :root {
+            --ios-bg-primary: #ffffff;
+            --ios-bg-secondary: #f2f2f7;
+            --ios-bg-tertiary: #ffffff;
+            --ios-text-primary: #000000;
+            --ios-text-secondary: #8e8e93;
+            --ios-accent: #4CAF50;
+            --ios-success: #34c759;
+            --ios-warning: #ff9500;
+            --ios-danger: #ff3b30;
+            --glass-border: rgba(0,0,0,0.1);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-xs: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
         /* DARK MODE VARIABLES INJECTION */
         :root.dark-theme {
             --ios-bg-primary: #000000;
@@ -26,15 +41,6 @@
             --shadow-xs: 0 1px 4px rgba(0,0,0,0.5);
             color-scheme: dark;
         }
-
-        /* ENGINE ANTI-FLASH (Berjalan sebelum DOM selesai) */
-        <script>
-            const savedTheme = localStorage.getItem('katering-theme');
-            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
-                document.documentElement.classList.add('dark-theme');
-            }
-        </script>
 
         body { 
             background-color: var(--ios-bg-primary);
@@ -137,7 +143,7 @@
             top: 30px;
         }
 
-        /* RE-ARCHITECTED ELEMENTS */
+        /* CARD ELEMENTS */
         .card {
             background: var(--ios-bg-secondary);
             border-radius: 20px;
@@ -209,7 +215,7 @@
             color: var(--ios-text-secondary);
         }
 
-        /* FIX INPUT TEXT WARNA DI DARK MODE */
+        /* INPUT TEXT COMPONENT */
         input.input {
             background: var(--ios-bg-tertiary);
             color: var(--ios-text-primary);
@@ -238,6 +244,19 @@
             margin-top: 4px;
         }
         
+        /* BUTTONS */
+        .btn {
+            background: var(--ios-bg-tertiary);
+            color: var(--ios-text-primary);
+            border: 1px solid var(--glass-border);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary { background: var(--ios-accent); color: white; border: none; }
+        .btn-secondary { background: var(--ios-bg-tertiary); border: 1px solid var(--glass-border); }
+
         .action-btn { 
             border: none; 
             padding: 8px 12px; 
@@ -251,7 +270,7 @@
         .btn-edit { background-color: var(--ios-warning); color: white; margin-right: 4px; }
         .btn-delete { background-color: var(--ios-danger); color: white; }
 
-        /* GRID INPUT SPESIFIK OVERHEAD */
+        /* OVERHEAD SUBGRID */
         .overhead-subgrid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -274,7 +293,7 @@
             .hasil-text { font-size: 26px; }
         }
 
-        /* STYLE PRINT REPORT UTUH */
+        /* PRINT REPORT SYSTEM */
         @media print {
             body { background: white; color: black; }
             header, .recipe-control-bar, .left-data-track, #btnTambahBahan, .btn, .action-btn, .form-bahan, .theme-toggle {
@@ -288,51 +307,64 @@
         }
         .print-report-view { display: none; }
     </style>
+
+    <!-- ANTI-FLASH THEME ENGINE JAVASCRIPT (Ditaruh aman di bawah style) -->
+    <script>
+        const savedTheme = localStorage.getItem('katering-theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+            document.documentElement.classList.add('dark-theme');
+        }
+    </script>
 </head>
 <body>
 
     <main>
+        <!-- TOP NAVIGATION & HEADER WITH DARK MODE TOGGLE -->
         <header>
             <div>
-                <h1 class="h1" style="margin: 0 0 4px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Katering Pro Studio</h1>
-                <p class="caption" style="margin: 0; color: var(--ios-text-secondary);">Sistem Tata Harga Komparatif & Analisis Margin</p>
+                <h1 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Katering Pro Studio</h1>
+                <p style="margin: 0; color: var(--ios-text-secondary);">Sistem Tata Harga Komparatif & Analisis Margin</p>
             </div>
             <button class="theme-toggle" onclick="toggleThemeCore()" id="btnThemeToggle">
                 🌙 Mode Gelap
             </button>
         </header>
 
+        <!-- TOOLBAR MANAJEMEN MULTI-RESEP -->
         <div class="recipe-control-bar" id="recipeBar">
             <div class="flex-cluster">
-                <span class="caption" style="font-weight: 700; color: var(--ios-text-secondary);">Pilih Menu:</span>
+                <span style="font-weight: 700; color: var(--ios-text-secondary);">Pilih Menu:</span>
                 <select id="recipeSelector" class="select-ios" onchange="switchRecipeUI()"></select>
             </div>
             <div class="flex-cluster">
                 <input type="text" id="recipeNameInput" class="input" placeholder="Ganti nama resep" style="margin-bottom: 0;">
-                <button class="btn btn-secondary tap" onclick="renameRecipeUI()" style="padding: 10px 16px;">Rename</button>
+                <button class="btn btn-secondary" onclick="renameRecipeUI()" style="padding: 10px 16px;">Rename</button>
             </div>
             <div class="flex-cluster">
-                <button class="btn btn-primary tap" onclick="createNewRecipeUI()" style="padding: 10px 16px;">+ Resep Baru</button>
-                <button class="btn tap" style="background: var(--ios-danger); color:white; padding: 10px 14px;" onclick="deleteRecipeUI()">✕ Hapus</button>
+                <button class="btn btn-primary" onclick="createNewRecipeUI()" style="padding: 10px 16px;">+ Resep Baru</button>
+                <button class="btn" style="background: var(--ios-danger); color:white; padding: 10px 14px;" onclick="deleteRecipeUI()">✕ Hapus</button>
             </div>
         </div>
 
+        <!-- TWO-TRACK APP WORKSPACE -->
         <div class="app-workspace">
             
+            <!-- TRACK KIRI: MANAGEMENT DATA INPUT -->
             <div class="left-data-track">
                 <section id="konfigurasi" class="card">
                     <h2 class="card-title">⚙️ Parameter Produksi</h2>
                     <div class="overhead-subgrid">
                         <div class="form-group">
-                            <label class="caption" style="font-weight: 600;">Target Volume (Porsi):</label>
+                            <label style="font-weight: 600; font-size: 14px;">Target Volume (Porsi):</label>
                             <input type="number" class="input" id="inputPorsi" value="1" min="1" oninput="updateConfigLive()">
                         </div>
                         <div class="form-group">
-                            <label class="caption" style="font-weight: 600;">Target Margin Bersih (%):</label>
+                            <label style="font-weight: 600; font-size: 14px;">Target Margin Bersih (%):</label>
                             <input type="number" class="input" id="inputMargin" value="30" min="0" oninput="updateConfigLive()">
                         </div>
                         <div class="form-group">
-                            <label class="caption" style="font-weight: 600;">Buffer Risiko Harga (%):</label>
+                            <label style="font-weight: 600; font-size: 14px;">Buffer Risiko Harga (%):</label>
                             <input type="number" class="input" id="inputBuffer" value="5" min="0" oninput="updateConfigLive()">
                         </div>
                     </div>
@@ -345,7 +377,7 @@
                             <input type="text" class="input" id="namaBahan" placeholder="Nama Komponen Bahan">
                         </div>
                         <div class="input-row-grid">
-                            <input type="number" class="input" id="hargaBeli" placeholder="Harga Pasar Beli (Rp)" style="margin-bottom: 0;">
+                            <input type="number" class="input" id="hargaBeli" placeholder="Harga Pasar Beli (Rp)">
                             <select id="satuanBeli" class="select-ios">
                                 <option value="kg">KG</option>
                                 <option value="gr">Gram</option>
@@ -355,11 +387,11 @@
                             </select>
                         </div>
                         <div class="input-row-grid">
-                            <input type="number" class="input" id="beratBeli" placeholder="Kapasitas Unit Beli (Massa/Vol)" style="margin-bottom: 0;">
-                            <span class="caption" style="align-self: center; font-weight: 700; text-align: center; color: var(--ios-text-secondary);">Volume Toko</span>
+                            <input type="number" class="input" id="beratBeli" placeholder="Kapasitas Unit Beli">
+                            <span style="align-self: center; font-weight: 700; text-align: center; color: var(--ios-text-secondary); font-size: 12px;">Volume Toko</span>
                         </div>
                         <div class="input-row-grid">
-                            <input type="number" class="input" id="beratDipakai" placeholder="Kebutuhan Bersih Resep" style="margin-bottom: 0;">
+                            <input type="number" class="input" id="beratDipakai" placeholder="Kebutuhan Bersih Resep">
                             <select id="satuanPakai" class="select-ios">
                                 <option value="gr">Gram</option>
                                 <option value="kg">KG</option>
@@ -369,10 +401,10 @@
                             </select>
                         </div>
                         <div class="input-row-grid">
-                            <input type="number" class="input" id="yieldBahan" placeholder="Yield Faktor (%)" value="100" style="margin-bottom: 0;">
-                            <span class="caption" style="align-self: center; font-weight: 700; text-align: center; color: var(--ios-text-secondary);">Sisa Bersih %</span>
+                            <input type="number" class="input" id="yieldBahan" placeholder="Yield Faktor (%)" value="100">
+                            <span style="align-self: center; font-weight: 700; text-align: center; color: var(--ios-text-secondary); font-size: 12px;">Sisa Bersih %</span>
                         </div>
-                        <button class="btn btn-secondary tap" onclick="tambahBahanUI()" id="btnTambahBahan" style="padding: 12px; font-weight: 700; margin-top: 4px;">+ Injeksi Masuk Resep</button>
+                        <button class="btn btn-secondary" onclick="tambahBahanUI()" id="btnTambahBahan" style="padding: 12px; font-weight: 700; margin-top: 4px;">+ Injeksi Masuk Resep</button>
                     </div>
                     
                     <div class="table-container">
@@ -393,31 +425,31 @@
                 <section id="overhead" class="card">
                     <h2 class="card-title">🚛 Biaya Operasional & Overhead</h2>
                     <div style="margin-bottom: 20px;">
-                        <p class="caption" style="font-weight: 700; color: var(--ios-text-primary); margin-bottom: 12px;">Biaya Tetap (Satu Batch Produksi)</p>
+                        <p style="font-weight: 700; color: var(--ios-text-primary); margin-bottom: 12px; font-size: 14px;">Biaya Tetap (Satu Batch Produksi)</p>
                         <div class="overhead-subgrid">
                             <div class="form-group">
-                                <label class="caption">Utilitas (Listrik/Air/Gas):</label>
+                                <label style="font-size: 12px;">Utilitas (Listrik/Air/Gas):</label>
                                 <input type="number" class="input" id="ovhListrik" oninput="updateOverheadLive()">
                             </div>
                             <div class="form-group">
-                                <label class="caption">Alokasi Tenaga Kerja Kerja:</label>
+                                <label style="font-size: 12px;">Alokasi Tenaga Kerja:</label>
                                 <input type="number" class="input" id="ovhTenaga" oninput="updateOverheadLive()">
                             </div>
                             <div class="form-group">
-                                <label class="caption">Transportasi & Logistik:</label>
+                                <label style="font-size: 12px;">Transportasi & Logistik:</label>
                                 <input type="number" class="input" id="ovhTransport" oninput="updateOverheadLive()">
                             </div>
                         </div>
                     </div>
                     <div>
-                        <p class="caption" style="font-weight: 700; color: var(--ios-text-primary); margin-bottom: 12px;">Biaya Variabel (Di-charge Per Porsi)</p>
+                        <p style="font-weight: 700; color: var(--ios-text-primary); margin-bottom: 12px; font-size: 14px;">Biaya Variabel (Di-charge Per Porsi)</p>
                         <div class="overhead-subgrid">
                             <div class="form-group">
-                                <label class="caption">Kemasan, Box, & Sendok:</label>
+                                <label style="font-size: 12px;">Kemasan, Box, & Sendok:</label>
                                 <input type="number" class="input" id="ovhKemasan" oninput="updateOverheadLive()">
                             </div>
                             <div class="form-group">
-                                <label class="caption">Komplemen Tambahan:</label>
+                                <label style="font-size: 12px;">Komplemen Tambahan:</label>
                                 <input type="number" class="input" id="ovhLain" oninput="updateOverheadLive()">
                             </div>
                         </div>
@@ -426,27 +458,28 @@
                 
             </div>
 
+            <!-- TRACK KANAN: STICKY LIVE FINANCIAL SUMMARY ENGINE -->
             <div class="right-dashboard-track">
-                <section id="dashboard-hasil" class="card" style="border: 1px solid rgba(0, 113, 227, 0.3);">
+                <section id="dashboard-hasil" class="card" style="border: 1px solid rgba(76, 175, 80, 0.3);">
                     <h2 class="card-title" style="color: var(--ios-accent);">📊 Ringkasan Finansial</h2>
                     <div class="metric-block">
-                        <p class="caption" style="margin: 0; font-weight: 600;">Rekomendasi Harga Jual (Per Porsi):</p>
+                        <p style="margin: 0; font-weight: 600; font-size: 14px;">Rekomendasi Harga Jual (Per Porsi):</p>
                         <div id="hasilHargaJual" class="hasil-text">Rp 0</div>
                     </div>
                     <div class="metric-block" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <p class="caption" style="margin: 0;">HPP Aman Kontingensi:</p>
+                            <p style="margin: 0; font-size: 14px;">HPP Aman Kontingensi:</p>
                             <span style="font-size: 12px; color: var(--ios-text-secondary);">(Bahan + Overhead + Buffer)</span>
                         </div>
                         <div id="hasilHPPAman" style="font-size: 18px; font-weight: 700; color: var(--ios-text-primary);">Rp 0</div>
                     </div>
                     <div class="metric-block" style="display: flex; justify-content: space-between; align-items: center;">
-                        <p class="caption" style="margin: 0;">Profit Bersih Realistis:</p>
+                        <p style="margin: 0; font-size: 14px;">Profit Bersih Realistis:</p>
                         <div id="hasilProfit" style="font-size: 18px; font-weight: 700; color: var(--ios-success);">Rp 0</div>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
-                        <button class="btn btn-primary tap" onclick="AppController.exportKeExcel()" style="padding: 12px; font-weight: 600;">💾 Export Excel</button>
-                        <button class="btn btn-secondary tap" onclick="triggerPDFPrint()" style="padding: 12px; font-weight: 600;">🖨️ Cetak PDF</button>
+                        <button class="btn btn-primary" onclick="AppController.exportKeExcel()" style="padding: 12px; font-weight: 600;">💾 Export Excel</button>
+                        <button class="btn btn-secondary" onclick="triggerPDFPrint()" style="padding: 12px; font-weight: 600;">🖨️ Cetak PDF</button>
                     </div>
 
                     <div class="print-report-view">
@@ -471,8 +504,10 @@
         </div>
     </main>
 
+    <!-- LOGIKA JAVASCRIPT APLIKASI -->
     <script src="script.js"></script>
     
+    <!-- THEME TOGGLE LOGIC -->
     <script>
         function updateThemeButtonUI() {
             const isDark = document.documentElement.classList.contains('dark-theme');
@@ -485,10 +520,10 @@
             updateThemeButtonUI();
         }
 
-        // Initialize button text on DOM Load
         window.addEventListener('DOMContentLoaded', updateThemeButtonUI);
     </script>
 
+    <!-- LIVE CONFIG & ENGINE SYNC -->
     <script>
         function updateConfigLive() {
             AppController.updateKonfigurasi('targetPorsi', document.getElementById('inputPorsi').value);
@@ -508,6 +543,7 @@
 
         function syncRecipeSelectors() {
             const selector = document.getElementById('recipeSelector');
+            if(!selector) return;
             selector.innerHTML = '';
             AppState.recipes.forEach(r => {
                 const opt = document.createElement('option');
@@ -567,6 +603,7 @@
 
         function renderTabelBahan() {
             const tbody = document.getElementById('listBahanBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
             const r = CateringEngine.getLiveRecipe();
 
@@ -575,11 +612,11 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${item.nama}</strong><br><span style="font-size:12px; color:var(--ios-accent); font-weight:600;">Cost: ${Utils.formatRupiah(subtotal)}</span></td>
-                    <td class="caption">${Utils.formatRupiah(item.hargaBeli)}<br>/ ${item.beratBeli} ${item.satuanBeli.toUpperCase()}</td>
-                    <td class="caption">${item.beratDipakai} ${item.satuanPakai.toUpperCase()}<br>Yield ${item.yieldFactor}%</td>
+                    <td>${Utils.formatRupiah(item.hargaBeli)}<br>/ ${item.beratBeli} ${item.satuanBeli.toUpperCase()}</td>
+                    <td>${item.beratDipakai} ${item.satuanPakai.toUpperCase()}<br>Yield ${item.yieldFactor}%</td>
                     <td style="text-align:center; vertical-align:middle;">
-                        <button onclick="editBahanUI('${item.id}')" class="action-btn btn-edit tap">✎</button>
-                        <button onclick="hapusBahanUI('${item.id}')" class="action-btn btn-delete tap">✕</button>
+                        <button onclick="editBahanUI('${item.id}')" class="action-btn btn-edit">✎</button>
+                        <button onclick="hapusBahanUI('${item.id}')" class="action-btn btn-delete">✕</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -661,14 +698,18 @@
         }
 
         window.onload = async function() {
-            await AppController.init();
-            loadActiveRecipeToForm();
+            if(typeof AppController !== 'undefined') {
+                await AppController.init();
+                loadActiveRecipeToForm();
+            }
         };
     </script>
+    
+    <!-- REGISTER SERVICE WORKER -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('sw.js')
                     .then(reg => console.log('Service Worker Standby. Mode Offline Aktif!'))
                     .catch(err => console.error('Service Worker Gagal dimuat.', err));
             });
