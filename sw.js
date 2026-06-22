@@ -1,12 +1,12 @@
-﻿const CACHE_NAME = 'katering-pro-v4'; 
+const CACHE_NAME = 'katering-pro-v5'; 
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/core.css',
-  '/script.js',
-  '/manifest.json',  
-  '/Icon-192.png',   
-  '/Icon-512px.png' 
+  './',
+  './index.html',
+  './core.css',
+  './script.js',
+  './manifest.json',  
+  './Icon-192.png',   
+  './Icon-512px.png' 
 ];
 
 // 1. Install & Cache semua aset + Paksa langsung aktif
@@ -15,7 +15,7 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then((cache) => {
       console.log('Membuka cache lokal...');
       return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting()) // <-- Memaksa SW baru langsung menggeser SW lama
+    }).then(() => self.skipWaiting())
   );
 });
 
@@ -41,6 +41,6 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim()) // <-- Langsung klaim halaman tanpa perlu reload tab
+    }).then(() => self.clients.claim())
   );
 });
