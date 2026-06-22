@@ -1,0 +1,648 @@
+﻿/* =========================================================
+   CORE ENGINE CSS
+   Next Generation UI/UX System Architecture
+========================================================= */
+
+/* ==========================
+   ROOT DESIGN TOKENS
+========================== */
+
+:root{
+
+    /* COLORS */
+
+    --ios-bg-primary:#f5f5f7;
+    --ios-bg-secondary:#ffffff;
+    --ios-bg-tertiary:#fafafa;
+
+    --ios-text-primary:#000000;
+    --ios-text-secondary:#6e6e73;
+    --ios-text-muted:#9b9b9f;
+
+    --ios-accent:#0071e3;
+    --ios-accent-hover:#1a82f0;
+
+    --ios-success:#34c759;
+    --ios-warning:#ff9500;
+    --ios-danger:#ff3b30;
+
+    /* GLASS */
+
+    --glass-bg:rgba(255,255,255,0.45);
+    --glass-border:rgba(255,255,255,0.18);
+    --glass-blur:25px;
+
+    /* SHADOW */
+
+    --shadow-xs:0 2px 8px rgba(0,0,0,0.04);
+    --shadow-sm:0 4px 15px rgba(0,0,0,0.06);
+    --shadow-md:0 8px 24px rgba(0,0,0,0.08);
+    --shadow-lg:0 15px 40px rgba(0,0,0,0.12);
+
+    /* BORDER */
+
+    --radius-xs:8px;
+    --radius-sm:14px;
+    --radius-md:22px;
+    --radius-lg:30px;
+    --radius-xl:42px;
+
+    /* ANIMATION */
+
+    --speed-fast:120ms;
+    --speed-normal:260ms;
+    --speed-slow:500ms;
+
+    --ease-fluid:cubic-bezier(0.25,0.8,0.25,1);
+
+}
+
+/* ==========================
+   DARK MODE ENGINE
+========================== */
+
+[data-theme="dark"]{
+
+    --ios-bg-primary:#000000;
+    --ios-bg-secondary:#121212;
+    --ios-bg-tertiary:#1a1a1a;
+
+    --ios-text-primary:#ffffff;
+    --ios-text-secondary:#b0b0b5;
+    --ios-text-muted:#7d7d82;
+
+    --glass-bg:rgba(30,30,30,0.4);
+
+}
+
+/* ==========================
+   RESET ENGINE
+========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+
+    background:var(--ios-bg-primary);
+    color:var(--ios-text-primary);
+
+    font-family:
+    Inter,
+    SF Pro Display,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+    line-height:1.6;
+}
+
+/* ==========================
+   TYPOGRAPHY ENGINE
+========================== */
+
+.h1{
+    font-size:48px;
+    font-weight:700;
+    letter-spacing:-1px;
+}
+
+.h2{
+    font-size:36px;
+    font-weight:650;
+}
+
+.h3{
+    font-size:28px;
+    font-weight:600;
+}
+
+.body-large{
+    font-size:18px;
+}
+
+.body{
+    font-size:16px;
+}
+
+.caption{
+    font-size:13px;
+    color:var(--ios-text-secondary);
+}
+
+/* ==========================
+   GLASSMORPHISM ENGINE
+========================== */
+
+.glass{
+
+    background:var(--glass-bg);
+
+    backdrop-filter:
+    blur(var(--glass-blur))
+    saturate(180%);
+
+    -webkit-backdrop-filter:
+    blur(var(--glass-blur))
+    saturate(180%);
+
+    border:1px solid var(--glass-border);
+
+    box-shadow:var(--shadow-md);
+
+}
+
+/* ==========================
+   CARD SYSTEM
+========================== */
+
+.card{
+
+    background:var(--ios-bg-secondary);
+
+    border-radius:var(--radius-md);
+
+    padding:24px;
+
+    box-shadow:var(--shadow-sm);
+
+    transition:all var(--speed-normal) var(--ease-fluid);
+
+}
+
+.card:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:var(--shadow-lg);
+
+}
+
+/* ==========================
+   BUTTON ENGINE
+========================== */
+
+.btn{
+
+    border:none;
+    cursor:pointer;
+
+    padding:14px 24px;
+
+    border-radius:18px;
+
+    font-size:15px;
+    font-weight:600;
+
+    transition:all 220ms ease;
+
+}
+
+.btn-primary{
+
+    background:var(--ios-accent);
+    color:white;
+
+}
+
+.btn-primary:hover{
+
+    background:var(--ios-accent-hover);
+
+    transform:scale(0.98);
+
+}
+
+.btn-secondary{
+
+    background:#ececec;
+
+    color:black;
+
+}
+
+.btn-pill{
+
+    border-radius:999px;
+
+}
+
+/* ==========================
+   INPUT ENGINE
+========================== */
+
+.input{
+
+    width:100%;
+
+    border:none;
+
+    padding:18px;
+
+    font-size:16px;
+
+    border-radius:18px;
+
+    background:rgba(255,255,255,0.7);
+
+    backdrop-filter:blur(10px);
+
+    transition:all .2s ease;
+
+}
+
+.input:focus{
+
+    outline:none;
+
+    box-shadow:0 0 0 3px rgba(0,113,227,.2);
+
+}
+
+/* ==========================
+   NAVIGATION SYSTEM
+========================== */
+
+.navbar{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+    right:0;
+
+    height:72px;
+
+    padding:0 24px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:space-between;
+
+    backdrop-filter:blur(30px);
+
+    background:rgba(255,255,255,.65);
+
+    z-index:9999;
+
+}
+
+/* ==========================
+   FLOATING ACTION
+========================== */
+
+.fab{
+
+    position:fixed;
+
+    right:30px;
+    bottom:30px;
+
+    width:65px;
+    height:65px;
+
+    border-radius:50%;
+
+    background:var(--ios-accent);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    box-shadow:var(--shadow-lg);
+
+}
+
+/* ==========================
+   MODAL SYSTEM
+========================== */
+
+.modal{
+
+    position:fixed;
+    inset:0;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    background:rgba(0,0,0,.35);
+
+    backdrop-filter:blur(20px);
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:all .3s ease;
+
+}
+
+.modal.active{
+
+    opacity:1;
+    pointer-events:auto;
+
+}
+
+.modal-content{
+
+    width:500px;
+
+    background:white;
+
+    border-radius:28px;
+
+    padding:35px;
+
+}
+
+/* ==========================
+   IOS SWITCH
+========================== */
+
+.switch{
+
+    width:54px;
+    height:32px;
+
+    background:#d9d9d9;
+
+    border-radius:999px;
+
+    position:relative;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.switch::after{
+
+    content:"";
+
+    width:26px;
+    height:26px;
+
+    border-radius:50%;
+
+    background:white;
+
+    position:absolute;
+
+    top:3px;
+    left:3px;
+
+    transition:.3s;
+
+}
+
+.switch.active{
+
+    background:#34c759;
+
+}
+
+.switch.active::after{
+
+    left:25px;
+
+}
+
+/* ==========================
+   GRID ENGINE
+========================== */
+
+.grid{
+
+    display:grid;
+
+    gap:24px;
+
+}
+
+.grid-2{
+
+    grid-template-columns:repeat(2,1fr);
+
+}
+
+.grid-3{
+
+    grid-template-columns:repeat(3,1fr);
+
+}
+
+.grid-4{
+
+    grid-template-columns:repeat(4,1fr);
+
+}
+
+/* ==========================
+   SCROLL ENGINE
+========================== */
+
+::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#c2c2c2;
+
+    border-radius:999px;
+
+}
+
+/* ==========================
+   LOADING SKELETON
+========================== */
+
+.skeleton{
+
+    background:linear-gradient(
+        90deg,
+        #ececec 25%,
+        #f6f6f6 50%,
+        #ececec 75%
+    );
+
+    background-size:200% 100%;
+
+    animation:skeleton 1.5s infinite;
+
+}
+
+@keyframes skeleton{
+
+    0%{
+        background-position:200% 0;
+    }
+
+    100%{
+        background-position:-200% 0;
+    }
+
+}
+
+/* ==========================
+   LIQUID MOTION EFFECT
+========================== */
+
+.liquid{
+
+    animation:liquidFlow 6s infinite ease-in-out;
+
+}
+
+@keyframes liquidFlow{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-6px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+
+}
+
+/* ==========================
+   MICRO INTERACTION
+========================== */
+
+.tap{
+
+    transition:transform .15s ease;
+
+}
+
+.tap:active{
+
+    transform:scale(.96);
+
+}
+
+/* ==========================
+   NOTIFICATION SYSTEM
+========================== */
+
+.toast{
+
+    position:fixed;
+
+    bottom:20px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    padding:18px 28px;
+
+    border-radius:20px;
+
+    background:rgba(20,20,20,.85);
+
+    color:white;
+
+    backdrop-filter:blur(20px);
+
+}
+
+/* ==========================
+   IOS TAB BAR
+========================== */
+
+.tabbar{
+
+    position:fixed;
+
+    bottom:0;
+
+    left:0;
+    right:0;
+
+    height:80px;
+
+    display:flex;
+
+    justify-content:space-around;
+    align-items:center;
+
+    backdrop-filter:blur(35px);
+
+    background:rgba(255,255,255,.75);
+
+}
+
+/* ==========================
+   RESPONSIVE ENGINE
+========================== */
+
+@media(max-width:768px){
+
+    .grid-4,
+    .grid-3,
+    .grid-2{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .modal-content{
+
+        width:90%;
+
+    }
+
+}
+
+/* ==========================
+   IOS DEPTH ENGINE
+========================== */
+
+.depth-1{
+    box-shadow:0 4px 12px rgba(0,0,0,.05);
+}
+
+.depth-2{
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.depth-3{
+    box-shadow:0 20px 50px rgba(0,0,0,.12);
+}
+
+/* ==========================
+   BLUR LAYER ENGINE
+========================== */
+
+.blur-light{
+
+    backdrop-filter:blur(10px);
+
+}
+
+.blur-medium{
+
+    backdrop-filter:blur(20px);
+
+}
+
+.blur-heavy{
+
+    backdrop-filter:blur(40px);
+
+}
