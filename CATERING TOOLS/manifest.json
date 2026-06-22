@@ -1,0 +1,22 @@
+﻿{
+  "name": "Katering Pro - Calculator",
+  "short_name": "Katering Pro",
+  "description": "Alat hitung HPP dan Profit Katering secara offline",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait",
+"icons": [
+    {
+      "src": "Icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "Icon-512px.png", 
+      "type": "image/png", 
+      "sizes": "512x512"
+    }
+  ]
+}

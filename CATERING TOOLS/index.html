@@ -1,0 +1,678 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katering Pro - Pricing Studio</title>
+    
+    <link rel="stylesheet" href="core.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0071e3"> 
+    
+    <style>
+        /* ======================================================================
+           MINIMALIST ENTERPRISE LAYOUT & THEME ENGINE (CTO ARCHITECTURE)
+           ====================================================================== */
+        
+        /* DARK MODE VARIABLES INJECTION */
+        :root.dark-theme {
+            --ios-bg-primary: #000000;
+            --ios-bg-secondary: #1c1c1e;
+            --ios-bg-tertiary: #2c2c2e;
+            --ios-text-primary: #ffffff;
+            --ios-text-secondary: #8e8e93;
+            --glass-border: rgba(255,255,255,0.1);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.6);
+            --shadow-xs: 0 1px 4px rgba(0,0,0,0.5);
+            color-scheme: dark;
+        }
+
+        /* ENGINE ANTI-FLASH (Berjalan sebelum DOM selesai) */
+        <script>
+            const savedTheme = localStorage.getItem('katering-theme');
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+                document.documentElement.classList.add('dark-theme');
+            }
+        </script>
+
+        body { 
+            background-color: var(--ios-bg-primary);
+            color: var(--ios-text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding-bottom: 40px; 
+            margin: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 40px 0 20px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 30px;
+        }
+        
+        main { 
+            max-width: 1280px; 
+            margin: 0 auto; 
+            padding: 0 24px; 
+        }
+
+        /* THEME TOGGLE BUTTON */
+        .theme-toggle {
+            background: var(--ios-bg-tertiary);
+            border: 1px solid var(--glass-border);
+            color: var(--ios-text-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .theme-toggle:hover {
+            opacity: 0.8;
+            border-color: var(--ios-accent);
+        }
+
+        /* MANAGED MULTI-RECIPE TOOLBAR */
+        .recipe-control-bar { 
+            background: var(--ios-bg-secondary); 
+            padding: 16px 20px; 
+            border-radius: 16px; 
+            margin-bottom: 30px; 
+            box-shadow: var(--shadow-sm);
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 16px; 
+            align-items: center; 
+            justify-content: space-between;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+        
+        .flex-cluster { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+        }
+        
+        .select-ios { 
+            padding: 10px 14px; 
+            border-radius: 10px; 
+            border: 1px solid var(--glass-border); 
+            background: var(--ios-bg-tertiary); 
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--ios-text-primary);
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .select-ios:focus {
+            border-color: var(--ios-accent);
+        }
+
+        /* ASYMMETRIC APP WORKSPACE (16:9 STRATEGY) */
+        .app-workspace {
+            display: grid;
+            grid-template-columns: 1.4fr 0.8fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .left-data-track {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .right-dashboard-track {
+            position: sticky;
+            top: 30px;
+        }
+
+        /* RE-ARCHITECTED ELEMENTS */
+        .card {
+            background: var(--ios-bg-secondary);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow-xs);
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--ios-text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+            margin-bottom: 16px; 
+        }
+        
+        .form-bahan { 
+            display: flex;
+            flex-direction: column;
+            gap: 12px; 
+            margin-bottom: 20px; 
+            background: var(--ios-bg-tertiary);
+            padding: 16px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input-row-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+        
+        /* DATA TABLE RESPONSIVE ENGINE */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 14px; 
+            background: var(--ios-bg-secondary);
+        }
+        
+        th, td { 
+            padding: 14px 12px; 
+            text-align: left; 
+            border-bottom: 1px solid var(--glass-border); 
+        }
+        
+        th { 
+            font-weight: 600; 
+            color: var(--ios-text-secondary);
+        }
+
+        /* FIX INPUT TEXT WARNA DI DARK MODE */
+        input.input {
+            background: var(--ios-bg-tertiary);
+            color: var(--ios-text-primary);
+            border: 1px solid var(--glass-border);
+            padding: 10px 14px;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input.input:focus { border-color: var(--ios-accent); }
+        
+        /* FINANCIAL METRICS DISPLAY */
+        .metric-block {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .metric-block:last-of-type {
+            border-bottom: none;
+        }
+        
+        .hasil-text { 
+            font-size: 32px; 
+            font-weight: 800; 
+            color: var(--ios-accent); 
+            letter-spacing: -1px;
+            margin-top: 4px;
+        }
+        
+        .action-btn { 
+            border: none; 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .action-btn:hover { opacity: 0.8; }
+        .btn-edit { background-color: var(--ios-warning); color: white; margin-right: 4px; }
+        .btn-delete { background-color: var(--ios-danger); color: white; }
+
+        /* GRID INPUT SPESIFIK OVERHEAD */
+        .overhead-subgrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+        
+        /* RESPONSIVE ENGINE */
+        @media (max-width: 992px) {
+            .app-workspace { grid-template-columns: 1fr; gap: 24px; }
+            .right-dashboard-track { position: static; }
+        }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; gap: 15px; padding: 30px 0 15px 0; margin-bottom: 15px; }
+            main { padding: 0 16px; }
+            .recipe-control-bar { padding: 12px; border-radius: 12px; gap: 10px; }
+            .flex-cluster { width: 100%; justify-content: space-between; }
+            .flex-cluster input { flex: 1; }
+            .card { padding: 16px; border-radius: 16px; }
+            .hasil-text { font-size: 26px; }
+        }
+
+        /* STYLE PRINT REPORT UTUH */
+        @media print {
+            body { background: white; color: black; }
+            header, .recipe-control-bar, .left-data-track, #btnTambahBahan, .btn, .action-btn, .form-bahan, .theme-toggle {
+                display: none !important;
+            }
+            .right-dashboard-track { position: static; width: 100% !important; }
+            .card { border: none !important; box-shadow: none !important; padding: 0 !important; background: white !important; }
+            .print-report-view { display: block !important; }
+            table { width: 100% !important; border: 1px solid #000; margin-top: 15px; background: white !important;}
+            th, td { border: 1px solid #000 !important; padding: 8px !important; color: black !important; }
+        }
+        .print-report-view { display: none; }
+    </style>
+</head>
+<body>
+
+    <main>
+        <header>
+            <div>
+                <h1 class="h1" style="margin: 0 0 4px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Katering Pro Studio</h1>
+                <p class="caption" style="margin: 0; color: var(--ios-text-secondary);">Sistem Tata Harga Komparatif & Analisis Margin</p>
+            </div>
+            <button class="theme-toggle" onclick="toggleThemeCore()" id="btnThemeToggle">
+                🌙 Mode Gelap
+            </button>
+        </header>
+
+        <div class="recipe-control-bar" id="recipeBar">
+            <div class="flex-cluster">
+                <span class="caption" style="font-weight: 700; color: var(--ios-text-secondary);">Pilih Menu:</span>
+                <select id="recipeSelector" class="select-ios" onchange="switchRecipeUI()"></select>
+            </div>
+            <div class="flex-cluster">
+                <input type="text" id="recipeNameInput" class="input" placeholder="Ganti nama resep" style="margin-bottom: 0;">
+                <button class="btn btn-secondary tap" onclick="renameRecipeUI()" style="padding: 10px 16px;">Rename</button>
+            </div>
+            <div class="flex-cluster">
+                <button class="btn btn-primary tap" onclick="createNewRecipeUI()" style="padding: 10px 16px;">+ Resep Baru</button>
+                <button class="btn tap" style="background: var(--ios-danger); color:white; padding: 10px 14px;" onclick="deleteRecipeUI()">✕ Hapus</button>
+            </div>
+        </div>
+
+        <div class="app-workspace">
+            
+            <div class="left-data-track">
+                <section id="konfigurasi" class="card">
+                    <h2 class="card-title">⚙️ Parameter Produksi</h2>
+                    <div class="overhead-subgrid">
+                        <div class="form-group">
+                            <label class="caption" style="font-weight: 600;">Target Volume (Porsi):</label>
+                            <input type="number" class="input" id="inputPorsi" value="1" min="1" oninput="updateConfigLive()">
+                        </div>
+                        <div class="form-group">
+                            <label class="caption" style="font-weight: 600;">Target Margin Bersih (%):</label>
+                            <input type="number" class="input" id="inputMargin" value="30" min="0" oninput="updateConfigLive()">
+                        </div>
+                        <div class="form-group">
+                            <label class="caption" style="font-weight: 600;">Buffer Risiko Harga (%):</label>
+                            <input type="number" class="input" id="inputBuffer" value="5" min="0" oninput="updateConfigLive()">
+                        </div>
+                    </div>
+                </section>
+
+                <section id="bahan-baku" class="card">
+                    <h2 class="card-title">🍳 Komposisi & Formula Bahan</h2>
+                    <div class="form-bahan">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="text" class="input" id="namaBahan" placeholder="Nama Komponen Bahan">
+                        </div>
+                        <div class="input-row-grid">
+                            <input type="number" class="input" id="hargaBeli" placeholder="Harga Pasar Beli (Rp)" style="margin-bottom: 0;">
+                            <select id="satuanBeli" class="select-ios">
+                                <option value="kg">KG</option>
+                                <option value="gr">Gram</option>
+                                <option value="l">Liter</option>
+                                <option value="ml">ML</option>
+                                <option value="pcs">Pcs</option>
+                            </select>
+                        </div>
+                        <div class="input-row-grid">
+                            <input type="number" class="input" id="beratBeli" placeholder="Kapasitas Unit Beli (Massa/Vol)" style="margin-bottom: 0;">
+                            <span class="caption" style="align-self: center; font-weight: 700; text-align: center; color: var(--ios-text-secondary);">Volume Toko</span>
+                        </div>
+                        <div class="input-row-grid">
+                            <input type="number" class="input" id="beratDipakai" placeholder="Kebutuhan Bersih Resep" style="margin-bottom: 0;">
+                            <select id="satuanPakai" class="select-ios">
+                                <option value="gr">Gram</option>
+                                <option value="kg">KG</option>
+                                <option value="ml">ML</option>
+                                <option value="l">Liter</option>
+                                <option value="pcs">Pcs</option>
+                            </select>
+                        </div>
+                        <div class="input-row-grid">
+                            <input type="number" class="input" id="yieldBahan" placeholder="Yield Faktor (%)" value="100" style="margin-bottom: 0;">
+                            <span class="caption" style="align-self: center; font-weight: 700; text-align: center; color: var(--ios-text-secondary);">Sisa Bersih %</span>
+                        </div>
+                        <button class="btn btn-secondary tap" onclick="tambahBahanUI()" id="btnTambahBahan" style="padding: 12px; font-weight: 700; margin-top: 4px;">+ Injeksi Masuk Resep</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama Komponen</th>
+                                    <th>Unit Pembelian</th>
+                                    <th>Kebutuhan Resep</th>
+                                    <th style="text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listBahanBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="overhead" class="card">
+                    <h2 class="card-title">🚛 Biaya Operasional & Overhead</h2>
+                    <div style="margin-bottom: 20px;">
+                        <p class="caption" style="font-weight: 700; color: var(--ios-text-primary); margin-bottom: 12px;">Biaya Tetap (Satu Batch Produksi)</p>
+                        <div class="overhead-subgrid">
+                            <div class="form-group">
+                                <label class="caption">Utilitas (Listrik/Air/Gas):</label>
+                                <input type="number" class="input" id="ovhListrik" oninput="updateOverheadLive()">
+                            </div>
+                            <div class="form-group">
+                                <label class="caption">Alokasi Tenaga Kerja Kerja:</label>
+                                <input type="number" class="input" id="ovhTenaga" oninput="updateOverheadLive()">
+                            </div>
+                            <div class="form-group">
+                                <label class="caption">Transportasi & Logistik:</label>
+                                <input type="number" class="input" id="ovhTransport" oninput="updateOverheadLive()">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="caption" style="font-weight: 700; color: var(--ios-text-primary); margin-bottom: 12px;">Biaya Variabel (Di-charge Per Porsi)</p>
+                        <div class="overhead-subgrid">
+                            <div class="form-group">
+                                <label class="caption">Kemasan, Box, & Sendok:</label>
+                                <input type="number" class="input" id="ovhKemasan" oninput="updateOverheadLive()">
+                            </div>
+                            <div class="form-group">
+                                <label class="caption">Komplemen Tambahan:</label>
+                                <input type="number" class="input" id="ovhLain" oninput="updateOverheadLive()">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+
+            <div class="right-dashboard-track">
+                <section id="dashboard-hasil" class="card" style="border: 1px solid rgba(0, 113, 227, 0.3);">
+                    <h2 class="card-title" style="color: var(--ios-accent);">📊 Ringkasan Finansial</h2>
+                    <div class="metric-block">
+                        <p class="caption" style="margin: 0; font-weight: 600;">Rekomendasi Harga Jual (Per Porsi):</p>
+                        <div id="hasilHargaJual" class="hasil-text">Rp 0</div>
+                    </div>
+                    <div class="metric-block" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p class="caption" style="margin: 0;">HPP Aman Kontingensi:</p>
+                            <span style="font-size: 12px; color: var(--ios-text-secondary);">(Bahan + Overhead + Buffer)</span>
+                        </div>
+                        <div id="hasilHPPAman" style="font-size: 18px; font-weight: 700; color: var(--ios-text-primary);">Rp 0</div>
+                    </div>
+                    <div class="metric-block" style="display: flex; justify-content: space-between; align-items: center;">
+                        <p class="caption" style="margin: 0;">Profit Bersih Realistis:</p>
+                        <div id="hasilProfit" style="font-size: 18px; font-weight: 700; color: var(--ios-success);">Rp 0</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+                        <button class="btn btn-primary tap" onclick="AppController.exportKeExcel()" style="padding: 12px; font-weight: 600;">💾 Export Excel</button>
+                        <button class="btn btn-secondary tap" onclick="triggerPDFPrint()" style="padding: 12px; font-weight: 600;">🖨️ Cetak PDF</button>
+                    </div>
+
+                    <div class="print-report-view">
+                        <hr style="border: 1px dashed #000; margin: 30px 0 20px 0;">
+                        <h2 style="font-size: 20px; font-weight: 800; margin: 0 0 4px 0;">LAPORAN REKOMENDASI PRICING</h2>
+                        <p id="pName" style="margin: 4px 0; font-weight: 600;"></p>
+                        <p id="pTarget" style="margin: 4px 0; color: #333;"></p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Komponen Baku</th>
+                                    <th>Kebutuhan Bersih</th>
+                                    <th>Subtotal Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody id="printTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+            
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    
+    <script>
+        function updateThemeButtonUI() {
+            const isDark = document.documentElement.classList.contains('dark-theme');
+            document.getElementById('btnThemeToggle').innerHTML = isDark ? '☀️ Mode Terang' : '🌙 Mode Gelap';
+        }
+
+        function toggleThemeCore() {
+            const isDark = document.documentElement.classList.toggle('dark-theme');
+            localStorage.setItem('katering-theme', isDark ? 'dark' : 'light');
+            updateThemeButtonUI();
+        }
+
+        // Initialize button text on DOM Load
+        window.addEventListener('DOMContentLoaded', updateThemeButtonUI);
+    </script>
+
+    <script>
+        function updateConfigLive() {
+            AppController.updateKonfigurasi('targetPorsi', document.getElementById('inputPorsi').value);
+            AppController.updateKonfigurasi('margin', document.getElementById('inputMargin').value);
+            AppController.updateKonfigurasi('buffer', document.getElementById('inputBuffer').value);
+            renderHasil();
+        }
+
+        function updateOverheadLive() {
+            AppController.updateOverhead('tetap', 'listrikGas', document.getElementById('ovhListrik').value);
+            AppController.updateOverhead('tetap', 'tenagaKerja', document.getElementById('ovhTenaga').value);
+            AppController.updateOverhead('tetap', 'transport', document.getElementById('ovhTransport').value);
+            AppController.updateOverhead('variabel', 'kemasan', document.getElementById('ovhKemasan').value);
+            AppController.updateOverhead('variabel', 'lainLain', document.getElementById('ovhLain').value);
+            renderHasil();
+        }
+
+        function syncRecipeSelectors() {
+            const selector = document.getElementById('recipeSelector');
+            selector.innerHTML = '';
+            AppState.recipes.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.innerText = r.namaResep;
+                if(r.id === AppState.currentRecipeId) opt.selected = true;
+                selector.appendChild(opt);
+            });
+            const active = CateringEngine.getLiveRecipe();
+            document.getElementById('recipeNameInput').value = active.namaResep;
+        }
+
+        async function switchRecipeUI() {
+            const id = document.getElementById('recipeSelector').value;
+            await AppController.pindahResep(id);
+            loadActiveRecipeToForm();
+        }
+
+        async function createNewRecipeUI() {
+            const nama = prompt("Masukkan Nama Menu/Resep Baru:");
+            if(!nama) return;
+            await AppController.tambahResepBaru(nama);
+            loadActiveRecipeToForm();
+        }
+
+        async function renameRecipeUI() {
+            const nama = document.getElementById('recipeNameInput').value;
+            if(!nama) return alert("Nama resep tidak boleh kosong!");
+            await AppController.ubahNamaResepAktif(nama);
+            syncRecipeSelectors();
+        }
+
+        async function deleteRecipeUI() {
+            if(confirm("Yakin ingin menghapus seluruh data resep ini? Data tidak bisa dikembalikan.")) {
+                await AppController.hapusResepAktif();
+                loadActiveRecipeToForm();
+            }
+        }
+
+        function loadActiveRecipeToForm() {
+            const r = CateringEngine.getLiveRecipe();
+            
+            document.getElementById('inputPorsi').value = r.konfigurasi.targetPorsi;
+            document.getElementById('inputMargin').value = r.konfigurasi.margin;
+            document.getElementById('inputBuffer').value = r.konfigurasi.buffer;
+            
+            document.getElementById('ovhListrik').value = r.overhead.tetap.listrikGas;
+            document.getElementById('ovhTenaga').value = r.overhead.tetap.tenagaKerja;
+            document.getElementById('ovhTransport').value = r.overhead.tetap.transport;
+            document.getElementById('ovhKemasan').value = r.overhead.variabel.kemasan;
+            document.getElementById('ovhLain').value = r.overhead.variabel.lainLain;
+
+            syncRecipeSelectors();
+            renderTabelBahan();
+            renderHasil();
+        }
+
+        function renderTabelBahan() {
+            const tbody = document.getElementById('listBahanBody');
+            tbody.innerHTML = '';
+            const r = CateringEngine.getLiveRecipe();
+
+            r.bahanBaku.forEach(item => {
+                const subtotal = CateringEngine.hitungSubtotalBahan(item);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${item.nama}</strong><br><span style="font-size:12px; color:var(--ios-accent); font-weight:600;">Cost: ${Utils.formatRupiah(subtotal)}</span></td>
+                    <td class="caption">${Utils.formatRupiah(item.hargaBeli)}<br>/ ${item.beratBeli} ${item.satuanBeli.toUpperCase()}</td>
+                    <td class="caption">${item.beratDipakai} ${item.satuanPakai.toUpperCase()}<br>Yield ${item.yieldFactor}%</td>
+                    <td style="text-align:center; vertical-align:middle;">
+                        <button onclick="editBahanUI('${item.id}')" class="action-btn btn-edit tap">✎</button>
+                        <button onclick="hapusBahanUI('${item.id}')" class="action-btn btn-delete tap">✕</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function tambahBahanUI() {
+            const nama = document.getElementById('namaBahan').value;
+            const hrg = document.getElementById('hargaBeli').value;
+            const beratBeli = document.getElementById('beratBeli').value;
+            const satBeli = document.getElementById('satuanBeli').value;
+            const beratPakai = document.getElementById('beratDipakai').value;
+            const satPakai = document.getElementById('satuanPakai').value;
+            const yld = document.getElementById('yieldBahan').value;
+
+            if(!nama || hrg <= 0 || beratBeli <= 0 || beratPakai <= 0) return alert("Lengkapi data form secara valid!");
+
+            await AppController.tambahBahanBaku(nama, hrg, beratBeli, satBeli, beratPakai, satPakai, yld);
+            
+            document.getElementById('namaBahan').value = '';
+            document.getElementById('hargaBeli').value = '';
+            document.getElementById('beratBeli').value = '';
+            document.getElementById('beratDipakai').value = '';
+            document.getElementById('yieldBahan').value = '100';
+
+            renderTabelBahan();
+            renderHasil();
+        }
+
+        async function hapusBahanUI(id) {
+            await AppController.hapusBahanBaku(id);
+            renderTabelBahan();
+            renderHasil();
+        }
+
+        async function editBahanUI(id) {
+            const r = CateringEngine.getLiveRecipe();
+            const item = r.bahanBaku.find(b => b.id === id);
+            if(!item) return;
+
+            document.getElementById('namaBahan').value = item.nama;
+            document.getElementById('hargaBeli').value = item.hargaBeli;
+            document.getElementById('beratBeli').value = item.beratBeli;
+            document.getElementById('satuanBeli').value = item.satuanBeli;
+            document.getElementById('beratDipakai').value = item.beratDipakai;
+            document.getElementById('satuanPakai').value = item.satuanPakai;
+            document.getElementById('yieldBahan').value = item.yieldFactor;
+
+            await AppController.hapusBahanBaku(id);
+            renderTabelBahan();
+            renderHasil();
+            document.getElementById('namaBahan').focus();
+        }
+
+        function renderHasil() {
+            const hasil = CateringEngine.kalkulasiTotal();
+            document.getElementById('hasilHargaJual').innerText = Utils.formatRupiah(hasil.hargaJualFinal);
+            document.getElementById('hasilHPPAman').innerText = Utils.formatRupiah(hasil.hppAmanPerPorsi);
+            document.getElementById('hasilProfit').innerText = Utils.formatRupiah(hasil.profitPerPorsi) + " (" + hasil.persentaseProfitReal + "%)";
+        }
+
+        function triggerPDFPrint() {
+            const r = CateringEngine.getLiveRecipe();
+            document.getElementById('pName').innerText = `Menu Resep: ${r.namaResep}`;
+            document.getElementById('pTarget').innerText = `Target Produksi Batch: ${r.konfigurasi.targetPorsi} Porsi`;
+            
+            const printTbody = document.getElementById('printTableBody');
+            printTbody.innerHTML = '';
+            r.bahanBaku.forEach(b => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${b.nama}</b></td>
+                    <td>${b.beratDipakai} ${b.satuanPakai.toUpperCase()} (Yield ${b.yieldFactor}%)</td>
+                    <td>${Utils.formatRupiah(CateringEngine.hitungSubtotalBahan(b))}</td>
+                `;
+                printTbody.appendChild(tr);
+            });
+            window.print();
+        }
+
+        window.onload = async function() {
+            await AppController.init();
+            loadActiveRecipeToForm();
+        };
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker Standby. Mode Offline Aktif!'))
+                    .catch(err => console.error('Service Worker Gagal dimuat.', err));
+            });
+        }
+    </script>
+</body>
+</html>
