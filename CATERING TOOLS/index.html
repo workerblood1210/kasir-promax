@@ -15,6 +15,7 @@
            ====================================================================== */
         
         /* DARK MODE VARIABLES INJECTION */
+<style>
         :root.dark-theme {
             --ios-bg-primary: #000000;
             --ios-bg-secondary: #1c1c1e;
@@ -27,13 +28,11 @@
             color-scheme: dark;
         }
 
-        /* ENGINE ANTI-FLASH (Berjalan sebelum DOM selesai) */
-        <script>
-            const savedTheme = localStorage.getItem('katering-theme');
-            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
-                document.documentElement.classList.add('dark-theme');
-            }
+        body { 
+            background-color: var(--ios-bg-primary);
+            /* ... sisa kode CSS body, header, dll bawahnya ... */
+        }
+    </style>
         </script>
 
         body { 
